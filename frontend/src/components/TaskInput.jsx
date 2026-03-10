@@ -1,13 +1,15 @@
-import {useState, useRef} from "react";
+import {useState, useEffect} from "react";
 import DatePicker from "./DatePicker.jsx";
 import 'flatpickr/dist/flatpickr.min.css';
 
-function TaskInput({onSubmit}) {
+function TaskInput({onSubmit, onResetRef}) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [dueDate, setDueDate] = useState("");
+    const [dueDate, setDueDate] = useState(new Date());
     const [error, setError] = useState("");
     const [priority, setPriority] = useState("");
+
+    const [resetKey, setResetKey] = useState(0);
 
     const PRIORITIES = ['Low', 'Medium', 'High'];
 
@@ -22,13 +24,20 @@ function TaskInput({onSubmit}) {
             setError("Please enter a description");
         }
 
-        console.log(title);
-        console.log(description);
-        console.log(dueDate);
-        console.log(priority);
-
-        onSubmit(title, description, priority, dueDate);
+        onSubmit({title, description, priority, dueDate});
     }
+
+    const resetFields = () => {
+        setTitle("");
+        setDescription("");
+        setPriority("");
+        setDueDate(new Date());
+        setResetKey(prev => prev + 1);
+    }
+
+    useEffect(() => {
+        if (onResetRef) onResetRef.current = resetFields;
+    }, [])
 
     return <div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -107,6 +116,7 @@ function TaskInput({onSubmit}) {
             </div>
 
             <DatePicker
+                key={resetKey}
                 value={dueDate}
                 onChange={(selectedDate) => setDueDate(selectedDate)}
             />

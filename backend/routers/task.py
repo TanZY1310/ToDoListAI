@@ -19,9 +19,6 @@ def get_session_id(session_id: Optional[str] = Cookie(None)):
 
 @router.post("/create")
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    print(f"DEBUG: Pydantic date object: {task.due_date}")
-    print(f"DEBUG: Type: {type(task.due_date)}")
-    print(f"DEBUG: Input data: {task.model_dump()}")
     db_task = Task(title=task.title, description=task.description, priority=task.priority, due_date=task.due_date)
     db.add(db_task)
     db.commit()

@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import axios from 'axios';
 import TaskInput from './TaskInput';
 import TaskDisplay from './TaskDisplay';
@@ -11,19 +11,22 @@ function TaskCreate() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [priority, setPriority] = useState("")
-    const [due_date, setDue_date] = useState(0)
+    const [dueDate, setDueDate] = useState(new Date())
+
+    const resetFormRef = useRef(null);
 
     const queryClient = useQueryClient();
 
-    const createTask = async (title, description, priority, due_date) => {
+    const createTask = async ({title, description, priority, dueDate}) => {
         setError(null)
         setTitle(title)
         setDescription(description)
-        setDue_date(due_date)
+        setPriority(priority)
+        setDueDate(dueDate)
+
         try {
             const response = await axios.post(`${API_BASE_URL}/tasks/create`,
-                {title: title, description: description, priority: priority, due_date: due_date});
-            console.log(response)
+                {title: title, description: description, priority: priority, due_date: dueDate});
             console.log(response.data);
             setTask(response.data);
         } catch (e) {
@@ -35,13 +38,13 @@ function TaskCreate() {
         mutationFn: createTask,
         onSuccess: () => {
             queryClient.invalidateQueries(["tasks"]);
-            setTitle("");
+            if (resetFormRef.current) resetFormRef.current(); //Reset field value after create task
         },
     });
 
     return (
         <div>
-            <TaskInput onSubmit={mutation.mutate} />
+            <TaskInput onSubmit={mutation.mutate} onResetRef={resetFormRef} />
             <TaskDisplay />
         </div>
     )

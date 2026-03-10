@@ -72,7 +72,8 @@ function TaskDisplay(){
                             <span className="font-semibold">Due in:</span> {(() => {
                                const days = getDaysUntilDue(task.due_date);
                                if (days === null) return "No due date";
-                               if (days > 0) return <span className="text-red-500">{Math.abs(days)} days overdue</span>;
+                               if (days > 0) return <span className="text-red-500">{Math.abs(days)} days</span>;
+                                if (days < 0) return <span className="text-red-500">{Math.abs(days)} days overdue</span>;
                                 if (days === 0) return <span className="text-orange-500">Due today</span>;
                                 return `${days} days`;
                         })()}
