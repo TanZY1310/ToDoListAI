@@ -16,13 +16,9 @@ function TaskInput({onSubmit, onResetRef}) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!title.trim()) {
-            setError("Please enter a title");
-        }
-
-        if (!description.trim()) {
-            setError("Please enter a description");
-        }
+        if (!title.trim()) return setError("Please enter a title");
+        if (!description.trim()) return setError("Please enter a description");
+        if (!priority.trim()) return setError("Please set the priority");
 
         onSubmit({title, description, priority, dueDate});
     }
@@ -80,6 +76,9 @@ function TaskInput({onSubmit, onResetRef}) {
             </div>
 
             <div className="dropdown relative inline-flex w-60">
+                <label className="label-text mb-1 block" htmlFor="priority">
+                  Priority
+                </label>
               <button
                 id="priority-dropdown"
                 type="button"
@@ -116,6 +115,7 @@ function TaskInput({onSubmit, onResetRef}) {
             </div>
 
             <DatePicker
+                id="due-date"
                 key={resetKey}
                 value={dueDate}
                 onChange={(selectedDate) => setDueDate(selectedDate)}

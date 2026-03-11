@@ -7,9 +7,6 @@ function App() {
   return (
       <Router>
         <div>
-          <header>
-            <h1>To Do List App</h1>
-          </header>
           <main>
             <Routes>
                 <Route path={"/"} element={<TaskCreate/>} />

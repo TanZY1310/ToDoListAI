@@ -9,7 +9,7 @@ class Task(Base):
     session_id = Column(String, index=True)
     title = Column(String, index=True)
     description = Column(String, index=True)
-    completed = Column(Boolean, index=True)
+    is_completed = Column(Boolean, index=True, default=False)
     priority = Column(String, index=True)
     created_at = Column(DATETIME, server_default=func.now())
     due_date = Column(DATETIME, nullable=True)

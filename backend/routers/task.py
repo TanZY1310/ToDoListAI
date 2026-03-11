@@ -19,7 +19,8 @@ def get_session_id(session_id: Optional[str] = Cookie(None)):
 
 @router.post("/create")
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    db_task = Task(title=task.title, description=task.description, priority=task.priority, due_date=task.due_date)
+    # db_task = Task(title=task.title, description=task.description, priority=task.priority, due_date=task.due_date)
+    db_task = Task(**task.model_dump())
     db.add(db_task)
     db.commit()
     db.refresh(db_task)
@@ -38,8 +39,10 @@ def update_task(task_id: int, task:TaskUpdate ,db: Session = Depends(get_db)):
     db_task.description = task.description
     db_task.priority = task.priority
     db_task.due_date = task.due_date
+    db_task.is_completed = task.is_completed
     db.commit()
     return {"message": "Task Updated Successfully"}
+
 @router.delete("/delete/{task_id}")
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     db_task = db.query(Task).filter(Task.task_id == task_id).first()

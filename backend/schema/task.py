@@ -11,6 +11,6 @@ class TaskCreate(BaseModel):
 class TaskUpdate(BaseModel):
     title: str
     description: str
-    is_completed: bool
+    is_completed: bool = False
     priority: str
     due_date: date

@@ -37,17 +37,58 @@ function TaskCreate() {
     const mutation = useMutation({
         mutationFn: createTask,
         onSuccess: () => {
-            queryClient.invalidateQueries(["tasks"]);
+            queryClient.invalidateQueries(["tasks"]); // Marks the cache as stale and auto fetch backend without page refresh
             if (resetFormRef.current) resetFormRef.current(); //Reset field value after create task
         },
     });
 
     return (
-        <div>
-            <TaskInput onSubmit={mutation.mutate} onResetRef={resetFormRef} />
-            <TaskDisplay />
+        <div className="min-h-screen bg-base-200">
+
+            {/* Page Header */}
+            <div className="bg-base-100 border-b border-base-content/10 px-6 py-4">
+                <h1 className="text-2xl font-bold text-base-content">Task Manager</h1>
+                <p className="text-sm text-base-content/60 mt-0.5">Create and manage your tasks</p>
+            </div>
+
+            <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-8">
+
+                {/* Task Creation Section */}
+                <section>
+                    <div className="card max-w-lg">
+                        <div className="card-body">
+                            <h2 className="card-title mb-2">Create New Task</h2>
+
+                            {/* Error Alert */}
+                            {error && (
+                                <div className="alert alert-error text-sm mb-2">
+                                    {error}
+                                </div>
+                            )}
+
+                            {/* Success Alert */}
+                            {mutation.isSuccess && (
+                                <div className="alert alert-success text-sm mb-2">
+                                    Task created successfully!
+                                </div>
+                            )}
+
+                            <TaskInput onSubmit={mutation.mutate} onResetRef={resetFormRef} />
+                        </div>
+                    </div>
+                </section>
+
+                {/* Divider */}
+                <div className="divider text-primary text-sm">Your Tasks</div>
+
+                {/* Task Display Section */}
+                <section>
+                    <TaskDisplay />
+                </section>
+
+            </div>
         </div>
-    )
+    );
 }
 
 export default TaskCreate;
