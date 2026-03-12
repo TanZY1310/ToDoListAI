@@ -11,7 +11,7 @@ function TaskCreate() {
     const [title, setTitle] = useState("")
     const [description, setDescription] = useState("")
     const [priority, setPriority] = useState("")
-    const [dueDate, setDueDate] = useState(new Date())
+    const [dueDate, setDueDate] = useState(new Date().toISOString().split("T")[0]);
 
     const resetFormRef = useRef(null);
 
@@ -23,6 +23,8 @@ function TaskCreate() {
         setDescription(description)
         setPriority(priority)
         setDueDate(dueDate)
+
+        console.log(dueDate)
 
         try {
             const response = await axios.post(`${API_BASE_URL}/tasks/create`,
@@ -73,7 +75,7 @@ function TaskCreate() {
                                 </div>
                             )}
 
-                            <TaskInput onSubmit={mutation.mutate} onResetRef={resetFormRef} />
+                            <TaskInput onSubmit={mutation.mutate} onResetRef={resetFormRef} mode="create" />
                         </div>
                     </div>
                 </section>

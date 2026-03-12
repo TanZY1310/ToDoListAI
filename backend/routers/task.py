@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, Cookie, Depends, Response
 from sqlalchemy.orm import Session
 
 from models.task import Task
-from schema.task import TaskCreate, TaskUpdate
+from schema.task import TaskCreate, TaskUpdate, TaskStatus
 from db.database import get_db
 
 router = APIRouter(
@@ -42,6 +42,15 @@ def update_task(task_id: int, task:TaskUpdate ,db: Session = Depends(get_db)):
     db_task.is_completed = task.is_completed
     db.commit()
     return {"message": "Task Updated Successfully"}
+
+@router.put("/updateStatus/{task_id}")
+def update_task_status(task_id: int, task:TaskStatus ,db: Session = Depends(get_db)):
+    db_task = db.query(Task).filter(Task.task_id == task_id).first()
+    if not db_task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    db_task.is_completed = task.is_completed
+    db.commit()
+    return {"message": "Task Status Updated Successfully"}
 
 @router.delete("/delete/{task_id}")
 def delete_task(task_id: int, db: Session = Depends(get_db)):

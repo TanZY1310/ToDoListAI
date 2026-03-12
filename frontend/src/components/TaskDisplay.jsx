@@ -50,7 +50,7 @@ function TaskDisplay(){
         const days = getDaysUntilDue(dueDate);
         if (days === null) return <span>No Due Date</span>;
         if (days < 0 ) return <span className="text-red-500">{Math.abs(days)} days overdue</span>;
-        if (days === 0) return <span className="text-orange-500">Due Today</span>;
+        if (days === 0) return <span className="text-orange-500">Today</span>;
         return <span className="text-green-600">{days} days</span>;
 
     }
@@ -60,11 +60,31 @@ function TaskDisplay(){
         console.log("Data from updatedTask", updatedTask);
 
         try {
-            const response = await axios.put(`${API_BASE_URL}/tasks/update/${updatedTask.taskId}`,
-                {title: updatedTask.title, description: updatedTask.description, priority: updatedTask.priority, due_date: updatedTask.dueDate,
-                        is_completed: updatedTask.isCompleted});
+            const response = await axios.put(`${API_BASE_URL}/tasks/update/${updatedTask.task_id}`,
+                {title: updatedTask.title, description: updatedTask.description, priority: updatedTask.priority, due_date: updatedTask.dueDate});
             queryClient.invalidateQueries({queryKey: ['tasks']})
             setSelectedTask(null);
+        } catch (e) {
+            return <div>Error: {e.message}</div>;
+        }
+    }
+
+    const updateTaskStatus = async (task) => {
+        console.log("Data from updateTaskStatus", task);
+        try {
+            await axios.put(`${API_BASE_URL}/tasks/updateStatus/${task.task_id}`, {
+                is_completed: !task.is_completed
+            });
+            queryClient.invalidateQueries({queryKey: ['tasks']})
+        } catch (e) {
+            return <div>Error: {e.message}</div>;
+        }
+    }
+
+    const deleteTask = async (taskId) => {
+        try {
+            const response = await axios.delete(`${API_BASE_URL}/tasks/delete/${taskId}`);
+            queryClient.invalidateQueries({queryKey: ['tasks']})
         } catch (e) {
             return <div>Error: {e.message}</div>;
         }
@@ -84,9 +104,12 @@ function TaskDisplay(){
                             </div>
 
                             {/* Description */}
-                            <p className="mb-4 text-base-content/70 text-sm line-clamp-3">
-                                {task.description}
-                            </p>
+                            <div className="card-actions justify-between items-center">
+                                <div className="text-xs text-base-content/60">
+                                    <span className="font-semibold">Description: </span>
+                                    {task.description}
+                                </div>
+                            </div>
 
                             {/* Due Date & Status Row */}
                             <div className="card-actions justify-between items-center">
@@ -94,20 +117,43 @@ function TaskDisplay(){
                                     <span className="font-semibold">Due in: </span>
                                     {renderDueDate(task.due_date)}
                                 </div>
+                            </div>
 
+                            <div className="card-actions justify-between items-center">
+                                <div className="text-xs text-base-content/60">
+                                    <span className="font-semibold">Priority: </span>
+                                    {task.priority}
+                                </div>
+                            </div>
+
+
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    className="checkbox checkbox-success"
+                                    checked={task.is_completed}
+                                    onChange={() => updateTaskStatus(task)}
+                                />
                                 <span className={`badge badge-soft text-xs font-medium ${
-                                    task.is_completed
-                                        ? "badge-success"
-                                        : "badge-warning"
+                                    task.is_completed ? "badge-success" : "badge-warning"
                                 }`}>
                                     Status: {task.is_completed ? "✓ Completed" : "In Progress"}
                                 </span>
                             </div>
 
                             <div className="card-actions mt-3">
-                                <button className="btn btn-outline btn-sm w-full"
-                                        onClick={() => setSelectedTask(task)}>
-                                    Edit Task
+                                <button className="btn btn-square  [--btn-color:#1877F2] text-white" aria-label="Edit Icon Button"
+                                        onClick={() => {
+                                            console.log("Data taken to update task", task)
+                                            setSelectedTask(task)
+
+                                        }}>
+                                    <span className="icon-[tabler--edit] size-5 shrink-0"></span>
+                                </button>
+
+                                <button className="btn btn-square  [--btn-color:#1877F2] text-white" aria-label="Delete Icon Button"
+                                        onClick={() => deleteTask(task.task_id)}>
+                                    <span className="icon-[tabler--trash] size-5 shrink-0"></span>
                                 </button>
                             </div>
 

@@ -14,3 +14,6 @@ class TaskUpdate(BaseModel):
     is_completed: bool = False
     priority: str
     due_date: date
+
+class TaskStatus(BaseModel):
+    is_completed: bool = False

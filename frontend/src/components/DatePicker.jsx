@@ -8,7 +8,7 @@ function DatePicker({ value, onChange }) {
   const getCurrentDate = () => {
     if (value) return value;
     const today = new Date();
-    return today.toISOString().split("T")[0]; // Split date time format to get date
+    return today.toISOString().split('T')[0];
   }
 
   const [selectedDate, setSelectedDate] = useState(getCurrentDate);

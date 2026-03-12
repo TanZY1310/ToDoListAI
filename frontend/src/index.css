@@ -4,6 +4,7 @@
 
 @plugin "flyonui";
 @source "./node_modules/flyonui/flyonui.js";
+@plugin "@iconify/tailwind4";
 
 /* Import Third-party override css */
 /* @import "flyonui/src/vendor/flatpickr.css"; */
