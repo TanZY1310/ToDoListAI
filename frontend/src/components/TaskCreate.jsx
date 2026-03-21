@@ -1,9 +1,11 @@
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import TaskInput from './TaskInput';
 import TaskDisplay from './TaskDisplay';
 import {API_BASE_URL} from "../util.js";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
+import { Notyf } from 'notyf';
+import 'notyf/notyf.min.css';
 
 function TaskCreate() {
     const [task, setTask] = useState(null)
@@ -14,8 +16,17 @@ function TaskCreate() {
     const [dueDate, setDueDate] = useState(new Date().toISOString().split("T")[0]);
 
     const resetFormRef = useRef(null);
-
+    const notyfRef = useRef(null);
     const queryClient = useQueryClient();
+
+    // Initialise Notyf (Notification message)
+    useEffect(() => {
+        notyfRef.current = new Notyf({
+            duration: 3000,
+            position: "top-right",
+        });
+
+    }, [])
 
     const createTask = async ({title, description, priority, dueDate}) => {
         setError(null)
@@ -32,7 +43,9 @@ function TaskCreate() {
             console.log(response.data);
             setTask(response.data);
         } catch (e) {
-            setError(`Failed to create task: ${e.message}`)
+            const errorMsg = `Failed to create task: ${e.message}`;
+            setError(errorMsg);
+            notyfRef.current?.error(errorMsg);
         }
     }
 
@@ -41,6 +54,7 @@ function TaskCreate() {
         onSuccess: () => {
             queryClient.invalidateQueries(["tasks"]); // Marks the cache as stale and auto fetch backend without page refresh
             if (resetFormRef.current) resetFormRef.current(); //Reset field value after create task
+            notyfRef.current?.success('Task created successfully!');
         },
     });
 
@@ -60,21 +74,6 @@ function TaskCreate() {
                     <div className="card max-w-lg">
                         <div className="card-body">
                             <h2 className="card-title mb-2">Create New Task</h2>
-
-                            {/* Error Alert */}
-                            {error && (
-                                <div className="alert alert-error text-sm mb-2">
-                                    {error}
-                                </div>
-                            )}
-
-                            {/* Success Alert */}
-                            {mutation.isSuccess && (
-                                <div className="alert alert-success text-sm mb-2">
-                                    Task created successfully!
-                                </div>
-                            )}
-
                             <TaskInput onSubmit={mutation.mutate} onResetRef={resetFormRef} mode="create" />
                         </div>
                     </div>

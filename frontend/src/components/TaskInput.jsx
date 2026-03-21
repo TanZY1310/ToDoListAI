@@ -18,9 +18,13 @@ function TaskInput({onSubmit, onResetRef, mode= "create", initialValues = {} }) 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!title.trim()) return setError("Please enter a title");
-        if (!description.trim()) return setError("Please enter a description");
-        if (!priority.trim()) return setError("Please set the priority");
+        if (!e.target.checkValidity()) {
+            e.target.classList.add("validate");
+            const firstInvalid = e.target.querySelector(':invalid');
+            if (firstInvalid) firstInvalid.focus();
+            return;
+        }
+        e.target.classList.add("validate");
 
         onSubmit({
             ...(mode === "edit" && { task_id: initialValues.task_id }), // Only include task_id when edit
@@ -47,7 +51,7 @@ function TaskInput({onSubmit, onResetRef, mode= "create", initialValues = {} }) 
     }, [mode, onResetRef]);
 
     return <div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="needs-validation flex flex-col gap-4" noValidate>
             <div className="w-full max-w-sm">
               <label className="label-text mb-1 block" htmlFor="title">
                   Title
@@ -57,10 +61,12 @@ function TaskInput({onSubmit, onResetRef, mode= "create", initialValues = {} }) 
                 type="text"
                 id="title"
                 placeholder="e.g., Buy Groceries"
-                className={`input w-full ${error ? 'input-error' : ''}`}
+                className="input w-full"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                required
               />
+                <span className="error-message">Please enter a title</span>
             </div>
 
             <div className="w-full max-w-sm">
@@ -72,10 +78,12 @@ function TaskInput({onSubmit, onResetRef, mode= "create", initialValues = {} }) 
                 type="text"
                 id="description"
                 placeholder="e.g., Bug Groceries for the family"
-                className={`input w-full ${error ? 'input-error' : ''}`}
+                className="input w-full"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+                required
               />
+                <span className="error-message">Please enter a description</span>
             </div>
 
             <div className="dropdown relative inline-flex w-60">
@@ -117,6 +125,17 @@ function TaskInput({onSubmit, onResetRef, mode= "create", initialValues = {} }) 
                 ))}
               </ul>
             </div>
+            {/*Hidden input for priority validation*/}
+            <input
+                type="text"
+                value={priority}
+                onChange={() => {}}
+                required
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+            />
+            <span className="error-message">Please select a priority</span>
 
             <DatePicker
                 id="due-date"

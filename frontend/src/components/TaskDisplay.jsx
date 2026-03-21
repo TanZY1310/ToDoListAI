@@ -4,6 +4,7 @@ import {API_BASE_URL} from "../util.js";
 import axios from "axios";
 import UpdateTaskModal from "./UpdateTaskModal.jsx";
 import { useQueryClient } from "@tanstack/react-query";
+import SubtaskGenerator from "./SubtaskGenerator.jsx";
 
 function TaskDisplay(){
 
@@ -156,6 +157,8 @@ function TaskDisplay(){
                                     <span className="icon-[tabler--trash] size-5 shrink-0"></span>
                                 </button>
                             </div>
+
+                            <SubtaskGenerator task={task} />
 
                         </div>
                     </div>

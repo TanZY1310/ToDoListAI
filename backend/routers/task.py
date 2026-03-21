@@ -7,6 +7,8 @@ from models.task import Task
 from schema.task import TaskCreate, TaskUpdate, TaskStatus
 from db.database import get_db
 
+from ollama import generate
+
 router = APIRouter(
     prefix="/tasks",
     tags=["tasks"]
@@ -60,4 +62,17 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
     db.delete(db_task)
     db.commit()
     return {"message": "Task Deleted Successfully"}
+
+
+@router.get("/ollama/subtasks")
+def generate_subtasks(title: str, description: str):
+    prompt = f"""Break down this task into 3-5 clear, actionable subtasks.
+                 Task Title: {title}
+                 Task Description: {description}
+
+                 Reply with ONLY a JSON array of strings, no explanation, no markdown, no extra text.
+                 Example: ["Subtask 1", "Subtask 2", "Subtask 3"]"""
+
+    response = generate('llama3.1', prompt)
+    return response['response']
 
