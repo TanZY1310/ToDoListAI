@@ -24,7 +24,6 @@ function TaskInput({onSubmit, onResetRef, mode= "create", initialValues = {} }) 
             if (firstInvalid) firstInvalid.focus();
             return;
         }
-        e.target.classList.add("validate");
 
         onSubmit({
             ...(mode === "edit" && { task_id: initialValues.task_id }), // Only include task_id when edit
@@ -41,6 +40,10 @@ function TaskInput({onSubmit, onResetRef, mode= "create", initialValues = {} }) 
         setPriority("");
         setDueDate(new Date().toISOString().split("T")[0]);
         setResetKey(prev => prev + 1);
+
+        // Clear validation state
+        const form = document.getElementById("form.needs-validation");
+        if (form) form.classList.remove("validate");
     }
 
     useEffect(() => {

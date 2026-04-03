@@ -67,7 +67,7 @@ function TaskCreate() {
                 <p className="text-sm text-base-content/60 mt-0.5">Create and manage your tasks</p>
             </div>
 
-            <div className="max-w-6xl mx-auto px-4 py-8 flex flex-col gap-8">
+            <div className="mx-auto px-4 py-8 flex flex-col gap-8">
 
                 {/* Task Creation Section */}
                 <section>

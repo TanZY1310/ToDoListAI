@@ -1,16 +1,25 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {API_BASE_URL} from "../util.js";
 import axios from "axios";
 import UpdateTaskModal from "./UpdateTaskModal.jsx";
 import { useQueryClient } from "@tanstack/react-query";
 import SubtaskGenerator from "./SubtaskGenerator.jsx";
+import {Notyf} from "notyf";
 
 function TaskDisplay(){
 
     const [selectedTask, setSelectedTask] = useState(null);
-
     const queryClient = useQueryClient();
+    const notyfRef = useRef(null);
+
+    useEffect(() => {
+        notyfRef.current = new Notyf({
+            duration: 3000,
+            position: "top-right",
+        });
+
+    }, [])
 
     const getTasks = async () => {
         try{
@@ -61,12 +70,13 @@ function TaskDisplay(){
         console.log("Data from updatedTask", updatedTask);
 
         try {
-            const response = await axios.put(`${API_BASE_URL}/tasks/update/${updatedTask.task_id}`,
+            await axios.put(`${API_BASE_URL}/tasks/update/${updatedTask.task_id}`,
                 {title: updatedTask.title, description: updatedTask.description, priority: updatedTask.priority, due_date: updatedTask.dueDate});
-            queryClient.invalidateQueries({queryKey: ['tasks']})
+            await queryClient.invalidateQueries({queryKey: ['tasks']})
             setSelectedTask(null);
+            notyfRef.current?.success('Task updated successfully!');
         } catch (e) {
-            return <div>Error: {e.message}</div>;
+            notyfRef.current?.error(e.response?.data?.message || e.message)
         }
     }
 
@@ -76,18 +86,20 @@ function TaskDisplay(){
             await axios.put(`${API_BASE_URL}/tasks/updateStatus/${task.task_id}`, {
                 is_completed: !task.is_completed
             });
-            queryClient.invalidateQueries({queryKey: ['tasks']})
+            await queryClient.invalidateQueries({queryKey: ['tasks']})
+            notyfRef.current?.success(!task.is_completed? 'Task status: Complete' : 'Task Status: In Progress');
         } catch (e) {
-            return <div>Error: {e.message}</div>;
+            notyfRef.current?.error(e.response?.data?.message || e.message)
         }
     }
 
     const deleteTask = async (taskId) => {
         try {
-            const response = await axios.delete(`${API_BASE_URL}/tasks/delete/${taskId}`);
-            queryClient.invalidateQueries({queryKey: ['tasks']})
+            await axios.delete(`${API_BASE_URL}/tasks/delete/${taskId}`);
+            await queryClient.invalidateQueries({queryKey: ['tasks']})
+            notyfRef.current?.success('Task deleted successfully!');
         } catch (e) {
-            return <div>Error: {e.message}</div>;
+            notyfRef.current?.error(e.response?.data?.message || e.message)
         }
     }
 
