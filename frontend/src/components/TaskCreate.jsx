@@ -1,95 +1,93 @@
-import {useEffect, useRef, useState} from 'react';
-import axios from 'axios';
-import TaskInput from './TaskInput';
-import TaskDisplay from './TaskDisplay';
-import {API_BASE_URL} from "../util.js";
-import {useMutation, useQueryClient} from "@tanstack/react-query";
-import { Notyf } from 'notyf';
-import 'notyf/notyf.min.css';
+import { useRef } from "react";
+import axios from "axios";
+import TaskInput from "./TaskInput";
+import TaskDisplay from "./TaskDisplay";
+import { API_BASE_URL } from "../util.js";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { ClipboardList } from "lucide-react";
 
 function TaskCreate() {
-    const [task, setTask] = useState(null)
-    const [error, setError] = useState(null)
-    const [title, setTitle] = useState("")
-    const [description, setDescription] = useState("")
-    const [priority, setPriority] = useState("")
-    const [dueDate, setDueDate] = useState(new Date().toISOString().split("T")[0]);
+  const resetFormRef = useRef(null);
+  const queryClient = useQueryClient();
 
-    const resetFormRef = useRef(null);
-    const notyfRef = useRef(null);
-    const queryClient = useQueryClient();
-
-    // Initialise Notyf (Notification message)
-    useEffect(() => {
-        notyfRef.current = new Notyf({
-            duration: 3000,
-            position: "top-right",
-        });
-
-    }, [])
-
-    const createTask = async ({title, description, priority, dueDate}) => {
-        setError(null)
-        setTitle(title)
-        setDescription(description)
-        setPriority(priority)
-        setDueDate(dueDate)
-
-        console.log(dueDate)
-
-        try {
-            const response = await axios.post(`${API_BASE_URL}/tasks/create`,
-                {title: title, description: description, priority: priority, due_date: dueDate});
-            console.log(response.data);
-            setTask(response.data);
-        } catch (e) {
-            const errorMsg = `Failed to create task: ${e.message}`;
-            setError(errorMsg);
-            notyfRef.current?.error(errorMsg);
-        }
-    }
-
-    const mutation = useMutation({
-        mutationFn: createTask,
-        onSuccess: () => {
-            queryClient.invalidateQueries(["tasks"]); // Marks the cache as stale and auto fetch backend without page refresh
-            if (resetFormRef.current) resetFormRef.current(); //Reset field value after create task
-            notyfRef.current?.success('Task created successfully!');
-        },
+  const createTask = async ({ title, description, priority, dueDate }) => {
+    const response = await axios.post(`${API_BASE_URL}/tasks/create`, {
+      title,
+      description,
+      priority,
+      due_date: dueDate,
     });
+    return response.data;
+  };
 
-    return (
-        <div className="min-h-screen bg-base-200">
+  const mutation = useMutation({
+    mutationFn: createTask,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      if (resetFormRef.current) resetFormRef.current();
+      toast.success("Task created successfully!");
+    },
+    onError: (e) => {
+      toast.error(`Failed to create task: ${e.message}`);
+    },
+  });
 
-            {/* Page Header */}
-            <div className="bg-base-100 border-b border-base-content/10 px-6 py-4">
-                <h1 className="text-2xl font-bold text-base-content">Task Manager</h1>
-                <p className="text-sm text-base-content/60 mt-0.5">Create and manage your tasks</p>
-            </div>
-
-            <div className="mx-auto px-4 py-8 flex flex-col gap-8">
-
-                {/* Task Creation Section */}
-                <section>
-                    <div className="card max-w-lg">
-                        <div className="card-body">
-                            <h2 className="card-title mb-2">Create New Task</h2>
-                            <TaskInput onSubmit={mutation.mutate} onResetRef={resetFormRef} mode="create" />
-                        </div>
-                    </div>
-                </section>
-
-                {/* Divider */}
-                <div className="divider text-primary text-sm">Your Tasks</div>
-
-                {/* Task Display Section */}
-                <section>
-                    <TaskDisplay />
-                </section>
-
-            </div>
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+          <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-primary/10">
+            <ClipboardList className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-xl font-semibold tracking-tight">Task Manager</h1>
+            <p className="text-sm text-muted-foreground">
+              Organize your work, stay on track
+            </p>
+          </div>
         </div>
-    );
+      </header>
+
+      {/* Main Content */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col gap-10">
+        {/* Create Task Section */}
+        <section className="max-w-lg mx-auto w-full">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Create New Task</CardTitle>
+              <CardDescription>
+                Fill in the details to add a new task to your list
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TaskInput
+                onSubmit={mutation.mutate}
+                onResetRef={resetFormRef}
+                mode="create"
+              />
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-sm font-medium text-muted-foreground">
+            Your Tasks
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
+        {/* Task Display Section */}
+        <section>
+          <TaskDisplay />
+        </section>
+      </div>
+    </div>
+  );
 }
 
 export default TaskCreate;

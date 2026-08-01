@@ -1,0 +1,11 @@
+# Agent / tooling
+.omo/
+.codegraph/
+.od-skills/
+
+# IDE
+.idea/
+.vscode/
+
+# Virtual environments
+.venv/
